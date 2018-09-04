@@ -3,7 +3,15 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  firebaseConfig:{
+    apiKey: "AIzaSyBlAPsgtKShpBEdALoo0Ndww3W6IoxLb2M",
+    authDomain: "chatapp-kliq.firebaseapp.com",
+    databaseURL: "https://chatapp-kliq.firebaseio.com",
+    projectId: "chatapp-kliq",
+    storageBucket: "chatapp-kliq.appspot.com",
+    messagingSenderId: "675125548023"
+  }
 };
 
 /*

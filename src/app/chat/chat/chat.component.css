@@ -1,0 +1,40 @@
+.chatDiv{
+    padding-top: 10rem;
+}
+.example-card {
+    min-width: 600px;
+    max-width: 600px;
+    min-height: 600px;
+    max-height: 600px;
+    background-color: beige;
+  }
+.chatbox{
+    min-height: 400px;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.mathead{
+    /* background-color: #000000; */
+}
+.inputType{
+    width: 30rem;
+}
+  .list-left{
+      margin-top: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      color: rgb(0, 0, 0);
+      background-color: rgb(249, 249, 249);
+      padding: 8px;
+      
+  }
+
+  .list-right{
+    margin-top: 5px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    color: aliceblue;
+    background-color: rgb(56, 54, 58);
+    padding: 8px;
+}
