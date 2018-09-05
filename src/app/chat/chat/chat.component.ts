@@ -1,5 +1,7 @@
-import { Component, OnInit, ViewChild, ElementRef} from '@angular/core';
-import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+// import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
+import * as firebase from 'firebase';
+import { ScrollDirectiveDirective } from '../../scroll-directive.directive';
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
@@ -8,66 +10,96 @@ import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 export class ChatComponent implements OnInit {
   // @ViewChild('abcdf') nameInputRef: ElementRef;
   // @ViewChild('bbbb') bbbb: ElementRef;
-  items: AngularFireList<any[]>;
-  sentmessage: string; //messages in db
-  showMessages = []; //messages to show
-  typedmessage: string;
+  // items: AngularFireList<any[]>;
+  userId: string = '2016288';
+  imageUrl: string = 'layers.png';
+  percent: number = 0;
+  sentmessage: string; //typed in db
   sentmessages = [];
-  constructor(private db: AngularFireDatabase) {
-
+  tempArray = [];
+  key: string;
+lastMessageKey: string;
+  constructor() {
   }
 
   ngOnInit() {
-    this.items = this.db.list('/messages');
-    let gg: any = {};
-    this.items.snapshotChanges().subscribe(value => {
-      console.log(value);
-      value.forEach(i => {
+    var starCountRef = firebase.database().ref('messages/').limitToLast(10);
 
-        this.sentmessages.push(i.payload.val());
+    starCountRef.once('value', (snapshot) => {
+      console.log('lenth', snapshot.numChildren());
+      this.sentmessages.length =0;
+      snapshot.forEach((entry) => {
+        this.sentmessages.push(entry.val());
+        this.lastMessageKey = this.sentmessages[0].messageId;
+        console.log('This first meesage '+this.lastMessageKey);
         setTimeout(function(){
-          // console.log(' elemeenenenenene '+this.bbbb.nativeElement);
-          // let elementRef = this.nameInputRef.nativeElement;
-          // let element = this.nameInputRef.nativeElement;
-          // element.scrollTop = element.scrollHeight;
-          let messageList = document.getElementById('message_list');
-          messageList.scrollTop = messageList.scrollHeight;
-        },10);
-        gg = i.payload.val();
-        // console.log(' GGGGGG' + gg.message.message);
+        let messageList = document.getElementById('message_list');
+        messageList.scrollTop = messageList.scrollHeight;
+        
+      }, 10);
       });
     });
 
+    
+      var ccc = (snapshot) => {
+        console.log(snapshot.val());
+        this.sentmessages.push(snapshot.val());
+        this.lastMessageKey = this.sentmessages[0].messageId;
+        console.log('This first meesage '+this.lastMessageKey);
+        setTimeout(function(){
+          let messageList = document.getElementById('message_list');
+          messageList.scrollTop = messageList.scrollHeight;
+        }, 10);
+      }
+      var onNewMessage = firebase.database().ref('messages/');
+      onNewMessage.on('child_added', ccc);
 
-
-
+    
+    
   }
+
+
 
   sendMessageUser() {
-    let msg: any = {};
-    msg.id = '123';
-
-    console.log('send User message clicked');
-    const itemsRef = this.db.list('/messages');
-    if (this.sentmessage) {
-      msg.message = this.sentmessage;
-      // itemsRef.push().key;
-      this.sentmessage = null;
-      this.sentmessages.length = 0;
-      msg = null;
-    } else {
-      alert('Please Type a text');
-    }
-
-  }
-  sendMessageAdmin() {
-    console.log('send Admin message clicked');
-    let msg: any = {};
-    msg.message = this.sentmessage;
-    const itemsRef = this.db.list('/messages');
-    itemsRef.push({ message: msg });
+    this.key = firebase.database().ref('messages/').push().key;
+    firebase.database().ref(`messages/${this.key}`).set({
+      userId: this.userId,
+      messageId: this.key,
+      message: this.sentmessage,
+      imageUrl: this.imageUrl
+    });
     this.sentmessage = null;
-    this.sentmessages.length = 0;
   }
+
+  sendMessageAdmin() {
+    this.key = firebase.database().ref('messages/').push().key;
+
+    firebase.database().ref(`messages/${this.key}`).set({
+      messageId: this.key,
+      message: this.sentmessage,
+      imageUrl: this.imageUrl
+    });
+    this.sentmessage = null;
+  }
+
+  track(value: number): void {
+    this.percent = value;
+    console.log('percentage',this.percent);
+    if(this.percent<20){
+      var starCountRef = firebase.database().ref('messages/').orderByChild('createdAt').endAt(this.lastMessageKey).limitToLast(10);
+
+      starCountRef.once('value', (snapshot) => {
+        console.log('lenth', snapshot.numChildren());
+        this.sentmessages.length =0;
+        snapshot.forEach((entry) => {
+          this.tempArray.push(entry.val());
+          setTimeout(function(){
+          this.tempArray.pop();
+          this.sentmessages.concat(this.sentmessages);
+        }, 500);
+        });
+      });
+    }
+}
 
 }
