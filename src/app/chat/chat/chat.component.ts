@@ -8,9 +8,6 @@ import { ScrollDirectiveDirective } from '../../scroll-directive.directive';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  // @ViewChild('abcdf') nameInputRef: ElementRef;
-  // @ViewChild('bbbb') bbbb: ElementRef;
-  // items: AngularFireList<any[]>;
   userId: string = '2016288';
   imageUrl: string = 'layers.png';
   percent: number = 0;
@@ -18,7 +15,11 @@ export class ChatComponent implements OnInit {
   sentmessages = [];
   tempArray = [];
   key: string;
-lastMessageKey: string;
+  firstMessageKey: string;
+  checkIfFirstMessage: string;
+  divHeight: number = 0;
+  scrollHeightToAlertUser: number;
+  loadedOnce:boolean = false;
   constructor() {
   }
 
@@ -27,40 +28,29 @@ lastMessageKey: string;
 
     starCountRef.once('value', (snapshot) => {
       console.log('lenth', snapshot.numChildren());
-      this.sentmessages.length =0;
+      this.sentmessages.length = 0;
       snapshot.forEach((entry) => {
         this.sentmessages.push(entry.val());
-        this.lastMessageKey = this.sentmessages[0].messageId;
-        console.log('This first meesage '+this.lastMessageKey);
-        setTimeout(function(){
-        let messageList = document.getElementById('message_list');
-        messageList.scrollTop = messageList.scrollHeight;
-        
-      }, 10);
+        setTimeout(function () {
+          let messageList = document.getElementById('message_list');
+          console.log('Scroll Top once', messageList.scrollTop);
+          messageList.scrollTop = messageList.scrollHeight;
+
+        }, 10);
       });
     });
 
-    
-      var ccc = (snapshot) => {
-        console.log(snapshot.val());
-        this.sentmessages.push(snapshot.val());
-        this.lastMessageKey = this.sentmessages[0].messageId;
-        console.log('This first meesage '+this.lastMessageKey);
-        setTimeout(function(){
-          let messageList = document.getElementById('message_list');
-          messageList.scrollTop = messageList.scrollHeight;
-        }, 10);
-      }
-      var onNewMessage = firebase.database().ref('messages/');
-      onNewMessage.on('child_added', ccc);
 
-    
-    
+   
+      this.onMethod();
+
+
   }
 
 
 
   sendMessageUser() {
+    console.log(this.sentmessages);
     this.key = firebase.database().ref('messages/').push().key;
     firebase.database().ref(`messages/${this.key}`).set({
       userId: this.userId,
@@ -69,6 +59,9 @@ lastMessageKey: string;
       imageUrl: this.imageUrl
     });
     this.sentmessage = null;
+    let messageList = document.getElementById('message_list');
+    this.scrollHeightToAlertUser = messageList.scrollHeight;
+    this.loadedOnce = true;
   }
 
   sendMessageAdmin() {
@@ -80,26 +73,79 @@ lastMessageKey: string;
       imageUrl: this.imageUrl
     });
     this.sentmessage = null;
+    this.loadedOnce = true;
   }
 
   track(value: number): void {
+    let messageList = document.getElementById('message_list');
+    console.log('Message list height',messageList.scrollTop);
+    this.firstMessageKey = this.sentmessages[0].messageId;
+    console.log('First Message Key ' + this.firstMessageKey);
     this.percent = value;
-    console.log('percentage',this.percent);
-    if(this.percent<20){
-      var starCountRef = firebase.database().ref('messages/').orderByChild('createdAt').endAt(this.lastMessageKey).limitToLast(10);
+    console.log('percentage', this.percent);
+    
+    if (this.percent === 0) {
 
-      starCountRef.once('value', (snapshot) => {
-        console.log('lenth', snapshot.numChildren());
-        this.sentmessages.length =0;
+      var starCountRef = firebase.database().ref('messages/').orderByKey().endAt(this.firstMessageKey).limitToLast(10);
+
+      starCountRef.on('value', (snapshot) => {
         snapshot.forEach((entry) => {
           this.tempArray.push(entry.val());
-          setTimeout(function(){
-          this.tempArray.pop();
-          this.sentmessages.concat(this.sentmessages);
-        }, 500);
         });
       });
-    }
-}
+      setTimeout(() => {
+        this.tempArray.pop();
+        this.sentmessages = this.tempArray.concat(this.sentmessages);
+        this.firstMessageKey = null;
+        console.log('new message array', this.sentmessages);
 
+      }, 1000);
+
+      setTimeout(() => {
+        for (var x = 0; x < this.tempArray.length; x++) {
+          var theDiv = document.getElementById(this.tempArray[x].messageId).offsetHeight;
+          this.divHeight += theDiv;
+          console.log('Div heaight', this.divHeight);
+          let messageList = document.getElementById('message_list');
+          messageList.scrollTop = this.divHeight;
+        }
+
+        this.divHeight = 0;
+        this.tempArray.length = 0;
+      }, 1000);
+    }
+  }
+
+  onMethod(){
+    
+    var ccc = (snapshot) => {
+      setTimeout(() =>{
+          let messageList = document.getElementById('message_list');
+          console.log('Scroll Top on', messageList.scrollTop);
+          console.log('scroll Height',messageList.scrollHeight);
+          console.log('off set height',messageList.offsetHeight);
+          console.log('THis PeERCENTZGE',this.percent);
+        
+          if(this.loadedOnce){
+            console.log('falseeeeeeeee')
+            if (messageList.scrollTop+messageList.offsetHeight>=messageList.scrollHeight){
+              this.sentmessages.push(snapshot.val());
+              setTimeout(()=>{
+                messageList.scrollTop = messageList.scrollHeight;
+              },20);
+            }else{
+              alert('You have a new message');
+              this.sentmessages.push(snapshot.val());
+            }
+          }else{
+            console.log('First Time Loaded');
+          }
+         
+          
+      }, 10);   
+ 
+  }
+  var onNewMessage = firebase.database().ref('messages/');
+  onNewMessage.on('child_added', ccc);
+  }
 }

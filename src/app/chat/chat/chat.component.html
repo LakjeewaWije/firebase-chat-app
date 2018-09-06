@@ -12,14 +12,14 @@
 
         <mat-card-content class="chatbox" id="message_list" (onScroll)="track($event)" appScrollDirective>
 
-          <div *ngFor="let messageld  of sentmessages" class="row" ngx-auto-scroll>
+          <div *ngFor="let messageld  of sentmessages" class="row" id="{{messageld.messageId}}">
             <div  class="col col-lg-6">
                   <div *ngIf="!messageld.userId" class="list-left">
                       <span >{{ messageld.message}}</span>
                   </div>
             </div>
             <div class="col col-lg-6">
-                <div *ngIf="messageld.userId" class="list-right">
+                <div *ngIf="messageld.userId" class="list-right" id="{{messageld.messageId}}">
                     <span >{{ messageld.message }}</span>
                 </div>
               </div>
