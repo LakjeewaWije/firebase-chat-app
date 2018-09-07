@@ -12,6 +12,7 @@ import {MatListModule} from '@angular/material/list';
 import {ChatComponent} from './chat/chat/chat.component';
 import { FormsModule } from '@angular/forms';
 import {NgxAutoScrollModule} from 'ngx-auto-scroll';
+import { HttpClientModule } from '@angular/common/http';
 import {AngularFireAuthModule} from 'angularfire2/auth/auth.module';
 import { ScrollDirectiveDirective } from './scroll-directive.directive';
 
@@ -25,6 +26,7 @@ firebase.initializeApp(environment.firebaseConfig);
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     // AngularFireModule.initializeApp(environment.firebaseConfig),
     // AngularFireDatabaseModule,
     // AngularFireAuthModule,

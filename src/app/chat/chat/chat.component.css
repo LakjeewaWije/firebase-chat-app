@@ -2,10 +2,13 @@
     padding-top: 10rem;
 }
 .example-card {
-    min-width: 600px;
+    /* min-width: 600px; */
     max-width: 600px;
-    min-height: 600px;
-    max-height: 600px;
+    /* min-height: 600px; */
+    max-height: 630px;
+
+    /* width: 600px;
+    height: 600px; */
     background-color: beige;
   }
 .chatbox{
@@ -18,7 +21,7 @@
     /* background-color: #000000; */
 }
 .inputType{
-    width: 30rem;
+    max-width: 30rem;
 }
   .list-left{
       margin-top: 5px;
