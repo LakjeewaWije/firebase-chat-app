@@ -39,12 +39,7 @@ export class ChatComponent implements OnInit {
         }, 10);
       });
     });
-
-
-   
-      this.onMethod();
-
-
+      this.onNewMessage();
   }
 
 
@@ -59,9 +54,6 @@ export class ChatComponent implements OnInit {
       imageUrl: this.imageUrl
     });
     this.sentmessage = null;
-    let messageList = document.getElementById('message_list');
-    this.scrollHeightToAlertUser = messageList.scrollHeight;
-    this.loadedOnce = true;
   }
 
   sendMessageAdmin() {
@@ -73,7 +65,6 @@ export class ChatComponent implements OnInit {
       imageUrl: this.imageUrl
     });
     this.sentmessage = null;
-    this.loadedOnce = true;
   }
 
   track(value: number): void {
@@ -98,7 +89,6 @@ export class ChatComponent implements OnInit {
         this.sentmessages = this.tempArray.concat(this.sentmessages);
         this.firstMessageKey = null;
         console.log('new message array', this.sentmessages);
-
       }, 1000);
 
       setTimeout(() => {
@@ -109,43 +99,39 @@ export class ChatComponent implements OnInit {
           let messageList = document.getElementById('message_list');
           messageList.scrollTop = this.divHeight;
         }
-
         this.divHeight = 0;
         this.tempArray.length = 0;
       }, 1000);
     }
   }
 
-  onMethod(){
+  onNewMessage(){
     
     var ccc = (snapshot) => {
       setTimeout(() =>{
           let messageList = document.getElementById('message_list');
-          console.log('Scroll Top on', messageList.scrollTop);
-          console.log('scroll Height',messageList.scrollHeight);
-          console.log('off set height',messageList.offsetHeight);
-          console.log('THis PeERCENTZGE',this.percent);
-        
           if(this.loadedOnce){
-            console.log('falseeeeeeeee')
             if (messageList.scrollTop+messageList.offsetHeight>=messageList.scrollHeight){
               this.sentmessages.push(snapshot.val());
               setTimeout(()=>{
                 messageList.scrollTop = messageList.scrollHeight;
               },20);
             }else{
-              alert('You have a new message');
+              if (snapshot.val().userId){
+
+              }else{
+                alert('You have a new message');
+              }
               this.sentmessages.push(snapshot.val());
             }
           }else{
+            this.loadedOnce = true;
             console.log('First Time Loaded');
           }
-         
-          
       }, 10);   
  
   }
-  var onNewMessage = firebase.database().ref('messages/');
+  var onNewMessage = firebase.database().ref('messages/').limitToLast(1);
   onNewMessage.on('child_added', ccc);
   }
 }
