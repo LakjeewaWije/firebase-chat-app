@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angula
 import { HttpClient } from '@angular/common/http';
 import { HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { RequestService } from '../../shared/requests/request.service';
 // import { AngularFireDatabase, AngularFireList } from 'angularfire2/database';
 import * as firebase from 'firebase';
 import { ScrollDirectiveDirective } from '../../scroll-directive.directive';
@@ -11,8 +12,7 @@ import { ScrollDirectiveDirective } from '../../scroll-directive.directive';
   styleUrls: ['./chat.component.css']
 })
 export class ChatComponent implements OnInit {
-  userId: string = '2016288';
-  imageUrl: string = 'layers.png';
+  
   percent: number = 0;
   sentmessage: string; //typed in db
   sentmessages = [];
@@ -24,35 +24,49 @@ export class ChatComponent implements OnInit {
   scrollHeightToAlertUser: number;
   loadedOnce: boolean = false;
   uid: string;
-  token = 'eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsInN1YiI6ImZpcmViYXNlLWFkbWluc2RrLWpqMnRxQHFhZ3JhZGNoYXQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJ1aWQiOiIxMDM3OTQzMTg5OTcyMTU2NDE2IiwiaXNzIjoiZmlyZWJhc2UtYWRtaW5zZGstamoydHFAcWFncmFkY2hhdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsImV4cCI6MTUzNjMwMjkxNSwiaWF0IjoxNTM2Mjk5OTE1fQ.bzpbLEqjikVXoydH4nIKrrHmYQaEpXt82nPWwR5hT2VeQrfWtcODBAYD1fsCWedcQ17HeSGad3C-Wf_VcnJukXXmsO2zOsSt8LhRtX2ArbHUJh8cw0KfwyLRmxt3yFpR7FtfNTjUeXft7jMf-lOksuWgCsuK08yTEwv_jf9jlH50lKl2h3H36SQSHwK3tNSCSQOBJr4XnuTNTP09Dsa4xFPINN-WUv9G77X2048wAR5Fx4rTs5VTYXXX9_Mr0gbpf-ac8oty20LgBGbPlqk5XxtZB7qvmHwyxD5cQg1uWlYV0uydSYlvOjRRCTcnbJOUs6U1Qv-7lk9npSGCGDFubw';
-  constructor(private http: HttpClient,private _activatedRoute: ActivatedRoute) {
+  groupId: string;
+  imageUrl: string;
+  sender: string;
+  tenantAuthToken : string;
+  fireBaseAuthToken : string;
+  constructor(private http: HttpClient,private _activatedRoute: ActivatedRoute, private _requestService: RequestService) {
     this._activatedRoute.queryParams.subscribe(this.getQueryParams.bind(this));
   }
 
   ngOnInit() {
-
-    // firebase.auth().signInWithCustomToken(this.token).catch(function(error) {
-    //   // Handle Errors here.
-    //   console.log('Error message',error.message)
-      
-    //   // ...
+    
+    // console.log(btoa('%7B"groupId":null,"tenantAuthToken":"eyJhbGciOiJIUzUxMiJ9.eyJ0ZW5hbnROYW1lIjoiQUJDRCBUZW5hbnQiLCJ0ZW5hbnRJZCI6IjEwMzUxNjA2Nzc2MDc2OTg0MzIiLCJpc3MiOiJhdXRoMCIsInRpbWUiOjE1MzYxNTU5OTAsInR5cGUiOiJzYWxlcyJ9.6N3XVkAPGAMUlDzDLmgLdviindlE-Lo-O8IyfRK43vbF-qiyZLflCToYcNngoSGA-Wxlj9LwpGLkET-529OeAg","fireBaseAuthToken":"eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsInN1YiI6ImZpcmViYXNlLWFkbWluc2RrLWs1MWgxQGVkdWxpbmtncmFkY2hhdC5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsInVpZCI6Im51bGwiLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1rNTFoMUBlZHVsaW5rZ3JhZGNoYXQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJleHAiOjE1MzYzMjM4OTksImlhdCI6MTUzNjMyMDg5OX0.onojalouDw6t2ba4wx9WBbZ4cZ-voi6Yq8nuQzLhfKhEFjVLykZGF6qZLoBJMh1uCor17BHwxenq899douXdil9pHG0BBI5LftzOOYNKcUzH2Zj4cRVESowREKpn63V-vNQRFgiySr_aNSHCRsHBzETCs4DVOpVLE58WytDJyS9udwasYPwxNbFqc1DGElhVye7ulMA4Qp-bxxGSIALKoDJn_sGR2HKTsRoY77vyIXiEoEZEdpBg7t9E6L8gYDwrxCl4uScpg4FUTcxzo97vW2VzqFCYnM8pfaqQEtDi1YsYw7hAVA9h_IKjkD5mcx2I9AruH-K-cQlFu4PTMTdz_Q"%7D&sender=Sudheesan'));
+    // firebase.auth().signInWithCustomToken(this.fireBaseAuthToken)
+    // .then(
+    //  function(token){
+    //    console.log(token.user.uid);
+    //    this.uid = token.user.uid;
+    //  }
+    // )
+    // .catch(function(error) {
+    //  // Handle Errors here.
+    //  var errorCode = error.code;
+    //  var errorMessage = error.message;
+    //  console.log(error.message);
+    //  // ...
     // });
     // this.uid = firebase.auth().currentUser.uid; // current user
-    // var starCountRef = firebase.database().ref(`messages/${this.uid}`).limitToLast(10); // reference
-    // starCountRef.once('value', (snapshot) => {
-    //   console.log('lenth', snapshot.numChildren());
-    //   this.sentmessages.length = 0;
-    //   snapshot.forEach((entry) => {
-    //     console.log(snapshot.val());
-    //     this.sentmessages.push(entry.val());
-    //     setTimeout(function () {
-    //       let messageList = document.getElementById('message_list');
-    //       console.log('Scroll Top once', messageList.scrollTop);
-    //       messageList.scrollTop = messageList.scrollHeight;
-    //     }, 10);
-    //   });
-    // });
-    // this.onNewMessage();
+    var starCountRef = firebase.database().ref('Message/1038033912568545280_sales').limitToLast(10); // reference
+    starCountRef.once('value', (snapshot) => {
+      console.log('lenth', snapshot.numChildren());
+      this.sentmessages.length = 0;
+      snapshot.forEach((entry) => {
+        // console.log(snapshot.val());
+        this.sentmessages.push(entry.val());
+        console.log('once',this.sentmessages);
+        setTimeout(function () {
+          let messageList = document.getElementById('message_list');
+          console.log('Scroll Top once', messageList.scrollTop);
+          messageList.scrollTop = messageList.scrollHeight;
+        }, 10);
+      });
+    });
+    this.onNewMessage();
   }
 
 
@@ -61,7 +75,7 @@ export class ChatComponent implements OnInit {
     console.log(this.sentmessages);
     this.key = firebase.database().ref('messages/').push().key;
     firebase.database().ref(`messages/${this.key}`).set({
-      userId: this.userId,
+      userId: this.groupId,
       messageId: this.key,
       message: this.sentmessage,
       imageUrl: this.imageUrl
@@ -80,17 +94,21 @@ export class ChatComponent implements OnInit {
   //   this.sentmessage = null;
   // }
 
+  /**
+   * Method to get  the cursor percentage when the scroll event trigers
+   * @param value 
+   */
   track(value: number): void {
     let messageList = document.getElementById('message_list');
     console.log('Message list height', messageList.scrollTop);
-    this.firstMessageKey = this.sentmessages[0].messageId;
+    this.firstMessageKey = this.sentmessages[0].objectId;
     console.log('First Message Key ' + this.firstMessageKey);
     this.percent = value;
     console.log('percentage', this.percent);
 
     if (this.percent === 0) {
 
-      var starCountRef = firebase.database().ref(`messages/${this.uid}`).orderByKey().endAt(this.firstMessageKey).limitToLast(10);
+      var starCountRef = firebase.database().ref('Message/1038033912568545280_sales').orderByKey().endAt(this.firstMessageKey).limitToLast(10);
 
       starCountRef.on('value', (snapshot) => {
         snapshot.forEach((entry) => {
@@ -106,7 +124,7 @@ export class ChatComponent implements OnInit {
 
       setTimeout(() => {
         for (var x = 0; x < this.tempArray.length; x++) {
-          var theDiv = document.getElementById(this.tempArray[x].messageId).offsetHeight;
+          var theDiv = document.getElementById(this.tempArray[x].objectId).offsetHeight;
           this.divHeight += theDiv;
           console.log('Div heaight', this.divHeight);
           let messageList = document.getElementById('message_list');
@@ -118,8 +136,11 @@ export class ChatComponent implements OnInit {
     }
   }
 
+  /**
+   * To catch the new  message added to firebase
+   */
   onNewMessage() {
-
+    
     var ccc = (snapshot) => {
       setTimeout(() => {
         let messageList = document.getElementById('message_list');
@@ -130,8 +151,8 @@ export class ChatComponent implements OnInit {
               messageList.scrollTop = messageList.scrollHeight;
             }, 20);
           } else {
-            if (snapshot.val().userId) {
-
+            if (!snapshot.val().admin) {
+              
             } else {
               alert('You have a new message');
             }
@@ -144,56 +165,62 @@ export class ChatComponent implements OnInit {
       }, 10);
 
     }
-    var onNewMessage = firebase.database().ref(`messages/${this.uid}`).limitToLast(1);
+    var onNewMessage = firebase.database().ref('Message/1038033912568545280_sales').limitToLast(1);
     onNewMessage.on('child_added', ccc);
   }
 
+  /**
+   * To send a new message
+   */
   sendAMessage() {
-
- const payload = {
-      groupId: '1037943189972156416_sales',
+    const payload = {
+      groupId: '1038033912568545280_sales',
       objectId: '',
-      senderId: '1037943189972156416',
+      senderId: '1038033912568545280',
       senderImage: 'http://cdn.gradchat.co/gradchatPublicImages/default_profile_picture.jpg',
-      senderName: 'namindu',
+      senderName: this.sender,
       status: '',
       type: 'text',
       text: this.sentmessage
     };
-    console.log(payload);
-    const headers = new HttpHeaders({
-      "X-AUTH-TOKEN": "abc",
-      "cache-control": "no-cache",
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    });
 
-    this.http.post<any>('https://qa.api.gradchat.co/v2/message/anonymous', 
-      payload
-    , { headers: headers }).subscribe(function(res) {
-      console.log(res);
-      if (res.data != null) {
-        console.log(res.data);
-        this.sendAMessage = null;
-      }
-    },
-      err => {
-        console.log(err);
+    this._requestService.sendAMessage(payload).
+    subscribe(this.sendMessageOnSuccess.bind(this), this.sendMessageOnError.bind(this));
 
-      }
-    );
   }
 
-  test(X) {
-    if (typeof X === 'object') {
-      return 'kashif';
-    } else {
-      return new Error('wrong type');
-    }
-  };
+  /**
+   * Successfull response of a sent message request
+   * @param res 
+   */
+  sendMessageOnSuccess(res){
+    console.log(res);
+
+  }
+  /**
+   * Error response of a sent message
+   * @param error 
+   */
+  sendMessageOnError(error){
+    console.log(error);
+  }
+
+  /**
+   * To read the query params
+   * @param queryParams 
+   */
   getQueryParams(queryParams) {
+    let data;
     if(queryParams){
-      console.log('Query params',queryParams);
+      console.log(queryParams);
+      data = decodeURIComponent(atob(queryParams.token));
+      console.log('Query params',JSON.parse(data));
+      this.sender = queryParams.sender;
+      this.fireBaseAuthToken = JSON.parse(data).fireBaseAuthToken;
+      this.tenantAuthToken = JSON.parse(data).tenantAuthToken;
+      this.groupId = JSON.parse(data).groupId;
+
+      // console.log('sender',this.sender,'firebaseAuthToken',this.fireBaseAuthToken,'tenantToken',this.tenantAuthToken,'groupId',this.groupId);
     }else{
       console.log('no query params found');
     }
