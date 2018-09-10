@@ -5,6 +5,7 @@ import {AngularFireDatabaseModule} from 'angularfire2/database';// angular fire
 import * as firebase from 'firebase';// firebase sdk
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
+import { SampleChatComponent } from './sample-chat/sample-chat/sample-chat.component';
 import { AppRoutingModule } from './/app-routing.module';
 import {MatCardModule} from '@angular/material/card';
 import {MatFormFieldModule} from '@angular/material/form-field';
@@ -21,6 +22,7 @@ firebase.initializeApp(environment.firebaseConfig);
   declarations: [
     AppComponent,
     ChatComponent,
+    SampleChatComponent,
     ScrollDirectiveDirective
   ],
   imports: [

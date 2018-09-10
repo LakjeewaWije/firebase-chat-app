@@ -1,0 +1,137 @@
+
+body {
+	background: #f0f1f2;
+	font:12px "Open Sans", sans-serif; 
+}
+
+#chatbox{
+	width:290px;
+	background:#fff;
+	border-radius:6px;
+	overflow:hidden;
+	height:484px;
+	position:absolute;
+	top:100px;
+	left:50%;
+	margin-left:-155px;
+}
+
+
+
+#profile{
+	height:153px;
+	overflow:hidden;
+	text-align:center;
+	color:#fff;
+}
+.p1 #profile{
+	background:#fff url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/timeline1.png") 0 0 no-repeat;
+}
+/* #chatview{
+	width:290px;
+	height:484px;
+	position:absolute;
+	top:0;
+	left:0;	
+	display:none;
+	background:#fff;
+} */
+#chat-messages label{
+	color:#aab8c2;
+	font-weight:600;
+	font-size:12px;
+	text-align:center;
+	margin:15px 0;
+	width:290px;
+	display:block;	
+}
+#chat-messages div.message{
+	padding:0 0 30px 58px;
+	clear:both;
+	margin-bottom:45px;
+}
+#chat-messages div.message.right{
+	  padding: 0 58px 30px 0;
+	  margin-right: -19px;
+	  margin-left: 19px;
+}
+#chat-messages .message img{
+	  float: left;
+	  margin-left: -38px;
+	  border-radius: 50%;
+	  width: 30px;
+	  margin-top: 12px;
+}
+#chat-messages div.message.right img{
+	float: right;	
+    margin-left: 0;
+	margin-right: -38px;	
+}
+.message .bubble{	
+	background:#f0f4f7;
+	font-size:13px;
+	font-weight:600;
+	padding:12px 13px;
+	border-radius:5px 5px 5px 0px;
+	color:#8495a3;
+	position:relative;
+	float:left;
+}
+#chat-messages div.message.right .bubble{
+	float:right;
+	border-radius:5px 5px 0px 5px ;
+}
+.bubble .corner{
+	background:url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/bubble-corner.png") 0 0 no-repeat;
+	position:absolute;
+	width:7px;
+	height:7px;
+	left:-5px;
+	bottom:0;
+}
+div.message.right .corner{
+	background:url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/bubble-cornerR.png") 0 0 no-repeat;
+	left:auto;
+	right:-5px;
+}
+
+#sendmessage{
+	height:60px;
+	border-top:1px solid #e7ebee;	
+	position:absolute;
+	bottom:0;
+	right:0px;
+	width:290px;
+	background:#fff;
+	padding-bottm:50px;
+}
+
+#sendmessage input{
+	background:#fff;
+	margin:21px 0 0 21px;
+	border:none;
+	padding:0;
+	font-size:14px;
+	font-family:"Open Sans", sans-serif; 
+	font-weight:400px;
+	color:#aab8c2;
+}
+#sendmessage input:focus{
+	 outline: 0;
+}
+#sendmessage button{
+	background:#fff url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/send.png") 0 -41px no-repeat;
+	width:30px;
+	height:30px;
+	position:absolute;
+	right: 15px;
+	top: 23px;
+	border:none;
+}
+#sendmessage button:hover{
+	cursor:pointer;
+	background-position: 0 0 ;
+}
+#sendmessage button:focus{
+	 outline: 0;	 
+}
