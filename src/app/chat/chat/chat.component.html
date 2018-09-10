@@ -1,9 +1,9 @@
 <div class="chatDiv">
   <div class="row">
-    <div class="col col-lg-4">
+    <div class="col-lg-4 col-sm-4 col-xs-4">
 
     </div>
-    <div class="col col-lg-6">
+    <div class="col-lg-6 col-sm-6 col-xs-6">
       <mat-card class="example-card">
         <mat-card-header class="mathead">
           <mat-card-title>Chat</mat-card-title>
@@ -13,12 +13,12 @@
         <mat-card-content class="chatbox" id="message_list" (onScroll)="track($event)" appScrollDirective>
 
           <div *ngFor="let messageld  of sentmessages" class="row" id="{{messageld.objectId}}">
-            <div  class="col col-lg-6">
+            <div  class="col-lg-6">
                   <div *ngIf="messageld.admin" class="list-left">
                       <span >{{ messageld.text}}</span>
                   </div>
             </div>
-            <div class="col col-lg-6">
+            <div class="col-lg-6">
                 <div *ngIf="!messageld.admin" class="list-right" id="{{messageld.objectId}}">
                     <span >{{ messageld.text }}</span>
                 </div>
@@ -45,7 +45,7 @@
         </mat-card-actions>
       </mat-card>
     </div>
-    <div class="col col-lg-2">
+    <div class="col-lg-2 col-sm-2 col-xs-2">
 
     </div>
   </div>

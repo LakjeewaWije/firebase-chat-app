@@ -142,27 +142,46 @@ export class ChatComponent implements OnInit {
   onNewMessage() {
     
     var ccc = (snapshot) => {
-      setTimeout(() => {
-        let messageList = document.getElementById('message_list');
         if (this.loadedOnce) {
-          if (messageList.scrollTop + messageList.offsetHeight >= messageList.scrollHeight) {
+          let messageList = document.getElementById('message_list');
+          
+            if (messageList.scrollTop + messageList.offsetHeight >= messageList.scrollHeight) {
             this.sentmessages.push(snapshot.val());
+          
+            console.log(snapshot.val());
+            console.log('___________________________________________________________________');
+            console.log('messageList.scrollTop',messageList.scrollTop);
+            console.log('messageList.scrollHeight',messageList.scrollHeight);
+            console.log('messageList.offsetHeight',messageList.offsetHeight);
+            console.log('___________________________________________________________________');
+            setTimeout(() => {
+            var theDiv = document.getElementById(snapshot.val().objectId).offsetHeight;
+            console.log(theDiv,'thidDiv');
+            },40);
             setTimeout(() => {
               messageList.scrollTop = messageList.scrollHeight;
-            }, 20);
-          } else {
-            if (!snapshot.val().admin) {
-              
-            } else {
-              alert('You have a new message');
-            }
+            },50);
+            
+          }else{
             this.sentmessages.push(snapshot.val());
+            if(!snapshot.val().admin){
+              setTimeout(() => {
+                var theDiv = document.getElementById(snapshot.val().objectId).offsetHeight;
+                console.log(theDiv,'thidDiv');
+                },50);
+                setTimeout(() => {
+                  messageList.scrollTop = messageList.scrollHeight;
+                },100);
+            }else{
+              alert('You have a new message From the Admin');
+            }
+            
           }
+           
         } else {
           this.loadedOnce = true;
           console.log('First Time Loaded');
         }
-      }, 10);
 
     }
     var onNewMessage = firebase.database().ref('Message/1038033912568545280_sales').limitToLast(1);
